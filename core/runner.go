@@ -1,13 +1,11 @@
 package core
 
 import (
-	"reflect"
 	"time"
 
 	"github.com/kilianp07/simu/adapters"
-	"github.com/mitchellh/mapstructure"
+	"github.com/kilianp07/simu/utils"
 	"github.com/rs/zerolog"
-	"github.com/spf13/viper"
 )
 
 type Runner struct {
@@ -19,39 +17,10 @@ type Runner struct {
 }
 
 func (r *Runner) readConfig(confPath string) (*Conf, error) {
-	viper.SetConfigFile(confPath)
-
-	if err := viper.ReadInConfig(); err != nil {
-		return nil, err
-	}
 
 	conf := &Conf{}
 
-	if err := viper.Unmarshal(conf, func(m *mapstructure.DecoderConfig) {
-		m.DecodeHook = mapstructure.ComposeDecodeHookFunc(
-			func(
-				f reflect.Type,
-				t reflect.Type,
-				data interface{}) (interface{}, error) {
-				if f.Kind() != reflect.String {
-					return data, nil
-				}
-				if t != reflect.TypeOf(time.Time{}) {
-					return data, nil
-				}
-
-				asString := data.(string)
-				if asString == "" {
-					return time.Time{}, nil
-				}
-
-				// Convert it by parsing
-				return time.Parse("2006-01-02", asString)
-			},
-			mapstructure.StringToTimeDurationHookFunc(),
-			mapstructure.StringToSliceHookFunc(","),
-		)
-	}); err != nil {
+	if err := utils.ReadJsonFile(confPath, conf); err != nil {
 		return nil, err
 	}
 
