@@ -55,6 +55,10 @@ func (r *Runner) readConfig(confPath string) (*Conf, error) {
 		return nil, err
 	}
 
+	if conf.Debug {
+		zerolog.SetGlobalLevel(zerolog.DebugLevel)
+	}
+
 	return conf, nil
 }
 
