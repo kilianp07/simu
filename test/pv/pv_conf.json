@@ -1,0 +1,8 @@
+{
+    "start_date": "2019-01-01",
+    "time_format": "2006-01-02T15:04:05:00Z",
+    "csv_path": "test/pv/pv.csv",
+    "p_col": 4,
+    "date_col": 0,
+    "host": "localhost:5002"
+}

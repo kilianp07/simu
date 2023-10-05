@@ -127,14 +127,21 @@ func (a *Adapter) HandleInputRegisters(req *modbus.InputRegistersRequest) (res [
 	for regAddr := req.Addr; regAddr < req.Addr+req.Quantity; regAddr++ {
 		switch regAddr {
 		case 0:
-			res = append(res, uint16(a.p_w*100))
+			val, _ := utils.Uint32ToUint16(uint32(a.p_w * 100))
+			res = append(res, val)
+
+		case 1:
+			_, val := utils.Uint32ToUint16(uint32(a.p_w * 100))
+			res = append(res, val)
+
 		default:
+			a.logger.Warn().Msg("PV: illegal data address")
 			err = modbus.ErrIllegalDataAddress
 			return
 		}
 	}
 
-	return nil, modbus.ErrIllegalFunction
+	return res, err
 }
 
 func (a *Adapter) HandleCoils(req *modbus.CoilsRequest) (res []bool, err error) {

@@ -1,0 +1,13 @@
+{
+    "start": "2023-10-02",
+    "end": "2023-10-02",
+    "period_ms": 1000,
+    "timestep_ms": 1000,
+    "adapters": [
+      {
+        "adapter": "generic/pv",
+        "name": "PV1",
+        "confPath": "test/pv/pv_conf.json"
+      }
+    ]
+  }

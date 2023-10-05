@@ -60,7 +60,7 @@ func (r *Runner) readConfig(confPath string) (*Conf, error) {
 
 func (r *Runner) instanciate() {
 	for _, adapter := range r.conf.Adapters {
-		if a := adapters.New(adapter.Name, adapter.ConfPath, r.simulatedTime, r.logger); a != nil {
+		if a := adapters.New(adapter.Adapter, adapter.ConfPath, r.simulatedTime, r.logger); a != nil {
 			r.adapters = append(r.adapters, *a)
 		}
 	}
