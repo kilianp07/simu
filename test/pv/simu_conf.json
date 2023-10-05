@@ -3,6 +3,7 @@
     "end": "2023-10-02",
     "period_ms": 1000,
     "timestep_ms": 1000,
+    "debug": true,
     "adapters": [
       {
         "adapter": "generic/pv",
