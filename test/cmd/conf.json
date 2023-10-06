@@ -1,0 +1,19 @@
+{
+    "start": "2023-10-02",
+    "end": "2023-10-02",
+    "period_ms": 1000,
+    "timestep_ms": 1000,
+    "adapters": [
+      {
+        "adapter": "Adapter1",
+        "name": "SimBlock1",
+        "confPath": "/path/to/conf1.json"
+      },
+      {
+        "adapter": "Adapter2",
+        "name": "SimBlock2",
+        "confPath": "/path/to/conf2.json"
+      }
+    ]
+  }
+  

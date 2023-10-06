@@ -15,7 +15,16 @@
 *.out
 
 # Dependency directories (remove the comment below to include it)
-# vendor/
+vendor/
 
 # Go workspace file
 go.work
+
+# IDE
+.vscode
+
+# Build dir
+build/*
+
+# Macos related files
+.DS_Store

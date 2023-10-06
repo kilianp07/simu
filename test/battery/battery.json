@@ -1,0 +1,9 @@
+{
+    "soc": 100,
+    "soh": 100,
+    "capacity_wh": 1000,
+    "p_charge_w": 1000,
+    "p_discharge_w": 1000,
+    "host": "localhost:5002",
+    "attenuation": 0.2
+}
