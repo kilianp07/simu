@@ -141,6 +141,13 @@ func (a *Adapter) HandleInputRegisters(req *modbus.InputRegistersRequest) (res [
 			_, val := utils.Uint32ToUint16(uint32(int32(a.capacity_Wh)))
 			res = append(res, val)
 
+		case 4:
+			val, _ := utils.Uint32ToUint16(uint32(int32(a.p_w)))
+			res = append(res, val)
+		case 5:
+			_, val := utils.Uint32ToUint16(uint32(int32(a.p_w)))
+			res = append(res, val)
+
 		default:
 			err = modbus.ErrIllegalDataAddress
 			return
