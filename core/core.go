@@ -27,8 +27,14 @@ func Launch(confpath string) {
 	r.instanciate()
 
 	if err = r.configureAdapters(); err != nil {
-		log.Fatal(err)
+		r.logger.Fatal().Err(err).Msg("Failed to configure adapters")
 		os.Exit(1)
 	}
+
+	if err = r.configureLinks(); err != nil {
+		r.logger.Fatal().Err(err).Msg("Failed to configure links")
+		os.Exit(1)
+	}
+
 	r.run()
 }

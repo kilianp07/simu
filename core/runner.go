@@ -4,13 +4,15 @@ import (
 	"time"
 
 	"github.com/kilianp07/simu/adapters"
+	"github.com/kilianp07/simu/core/links"
 	"github.com/kilianp07/simu/utils"
 	"github.com/rs/zerolog"
 )
 
 type Runner struct {
 	conf          *Conf
-	adapters      []adapters.Adapter
+	adapters      map[string]adapters.Adapter
+	links         *links.Links
 	simulatedTime *time.Time
 	logger        *zerolog.Logger
 	lastCycle     time.Time
@@ -34,7 +36,7 @@ func (r *Runner) readConfig(confPath string) (*Conf, error) {
 func (r *Runner) instanciate() {
 	for _, adapter := range r.conf.Adapters {
 		if a := adapters.New(adapter.Adapter, adapter.ConfPath, r.simulatedTime, r.logger); a != nil {
-			r.adapters = append(r.adapters, *a)
+			r.adapters[adapter.Name] = *a
 		}
 	}
 }
@@ -48,6 +50,20 @@ func (r *Runner) configureAdapters() error {
 	return nil
 }
 
+func (r *Runner) configureLinks() error {
+	var (
+		l   *links.Links
+		err error
+	)
+	if l, err = links.New(r.conf.LinksPath, r.adapters); err != nil {
+		return err
+	}
+
+	r.links = l
+
+	return nil
+}
+
 func (r *Runner) run() {
 	for {
 		// Wait for the next cycle
@@ -58,6 +74,9 @@ func (r *Runner) run() {
 		// At each cycle, we increment the simulated time
 		t := r.simulatedTime.Add(time.Duration(r.conf.Period) * time.Millisecond)
 		r.simulatedTime = &t
+
+		// Update I/O
+		r.links.Update()
 
 		for _, adapter := range r.adapters {
 			adapter.Cycle(r.simulatedTime)

@@ -211,3 +211,13 @@ func (a *Adapter) computeSetpoint() {
 		a.logger.Info().Msgf("Battery: setpoint exceed max charge power. Setpoint: %f, PmaxCharge %f", a.setPoint_w, a.conf.PCharge_w)
 	}
 }
+
+func (a *Adapter) Output() map[string]float64 {
+	return map[string]float64{
+		"p_w": a.p_w,
+	}
+}
+
+func (a *Adapter) Input(value float64, key string) {
+	a.logger.Warn().Msg("Battery: Adapter does not accept input")
+}

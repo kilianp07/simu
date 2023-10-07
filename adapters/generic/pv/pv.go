@@ -155,3 +155,13 @@ func (a *Adapter) HandleDiscreteInputs(req *modbus.DiscreteInputsRequest) (res [
 func (a *Adapter) HandleHoldingRegisters(req *modbus.HoldingRegistersRequest) (res []uint16, err error) {
 	return nil, modbus.ErrIllegalFunction
 }
+
+func (a *Adapter) Input(value float64, key string) {
+	a.logger.Warn().Msg("PV: Adapter does not accept input")
+}
+
+func (a *Adapter) Output() map[string]float64 {
+	return map[string]float64{
+		"p_w": a.p_w,
+	}
+}
