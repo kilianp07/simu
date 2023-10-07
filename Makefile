@@ -29,15 +29,11 @@ run:
 clean:
 	@rm -rf $(build_dir)
 
-# Target to generate GoDoc documentation for all packages
-.PHONY: docs
-docs:
-	@bash -c "$(curl -fsSL https://raw.githubusercontent.com/turo/pre-commit-hooks/main/hooks/golang/gomarkdoc.sh)"
-
 # Test target
 .PHONY: test
 test:
 	$(go_test) ./...
+
 	
 # Create docker image
 .PHONY: docker
