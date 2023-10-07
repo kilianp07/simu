@@ -84,16 +84,16 @@ func (a *Adapter) Configure() error {
 	a.filter = utils.NewLowPassFilter(a.conf.Attenuation)
 
 	if err != nil {
-		a.logger.Fatal().Err(err).Msg("PV: failed to create modbus server")
+		a.logger.Fatal().Err(err).Msg("generic/battery: failed to create modbus server")
 		return err
 	}
 
 	if err = a.server.Start(); err != nil {
-		a.logger.Fatal().Err(err).Msg("PV: failed to start modbus server")
+		a.logger.Fatal().Err(err).Msg("generic/battery: failed to start modbus server")
 		return err
 	}
 
-	a.logger.Info().Msgf("Battery: Modbus server started on %s", a.conf.Host)
+	a.logger.Info().Msgf("generic/battery: Modbus server started on %s", a.conf.Host)
 
 	return nil
 }
