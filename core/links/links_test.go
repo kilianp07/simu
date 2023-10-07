@@ -4,10 +4,10 @@ import "testing"
 
 const (
 	csvPath        = "../../test/core/links/links.csv"
-	source_adapter = "pv"
-	source_key     = "p_w"
-	target_adapter = "poc"
-	target_key     = "p"
+	source_adapter = "sender"
+	source_key     = "value"
+	target_adapter = "receiver"
+	target_key     = "value"
 )
 
 func TestNew(t *testing.T) {

@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/kilianp07/simu/adapters"
 	"github.com/kilianp07/simu/logger"
 )
 
@@ -12,7 +13,8 @@ func Launch(confpath string) {
 		conf *Conf
 		err  error
 		r    = &Runner{
-			logger: logger.Get(),
+			logger:   logger.Get(),
+			adapters: make(map[string]adapters.Adapter),
 		}
 	)
 

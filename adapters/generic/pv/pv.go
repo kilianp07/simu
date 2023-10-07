@@ -32,7 +32,7 @@ type conf struct {
 }
 
 func New(confpath string, simulatedTime *time.Time, logger *zerolog.Logger) *Adapter {
-
+	logger.Info().Msg("PV: Adapter created")
 	a := &Adapter{
 		Conf:          &conf{},
 		logger:        logger,
@@ -77,6 +77,8 @@ func (a *Adapter) Configure() error {
 		a.logger.Fatal().Err(err).Msg("PV: failed to get csv data")
 		return err
 	}
+
+	a.logger.Info().Msg("PV: Adapter configured")
 
 	return nil
 }

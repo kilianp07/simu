@@ -42,7 +42,7 @@ type conf struct {
 }
 
 func New(confpath string, simulatedTime *time.Time, logger *zerolog.Logger) *Adapter {
-
+	logger.Info().Msg("Battery: Adapter created")
 	a := &Adapter{
 		conf:          &conf{},
 		logger:        logger,
@@ -92,6 +92,8 @@ func (a *Adapter) Configure() error {
 		a.logger.Fatal().Err(err).Msg("PV: failed to start modbus server")
 		return err
 	}
+
+	a.logger.Info().Msgf("Battery: Modbus server started on %s", a.conf.Host)
 
 	return nil
 }
