@@ -6,6 +6,7 @@ import (
 	"github.com/kilianp07/simu/adapters/dummy/receiver"
 	"github.com/kilianp07/simu/adapters/dummy/sender"
 	"github.com/kilianp07/simu/adapters/generic/battery"
+	"github.com/kilianp07/simu/adapters/generic/poc"
 	"github.com/kilianp07/simu/adapters/generic/pv"
 	"github.com/rs/zerolog"
 )
@@ -25,6 +26,8 @@ func New(name string, confpath string, simulatedTime *time.Time, logger *zerolog
 		adapter = pv.New(confpath, simulatedTime, logger)
 	case "generic/battery":
 		adapter = battery.New(confpath, simulatedTime, logger)
+	case "generic/poc":
+		adapter = poc.New(confpath, simulatedTime, logger)
 	case "dummy/sender":
 		adapter = sender.New(confpath, simulatedTime, logger)
 	case "dummy/receiver":
