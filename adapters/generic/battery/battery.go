@@ -42,7 +42,7 @@ type conf struct {
 }
 
 func New(confpath string, simulatedTime *time.Time, logger *zerolog.Logger) *Adapter {
-
+	logger.Info().Msg("Battery: Adapter created")
 	a := &Adapter{
 		conf:          &conf{},
 		logger:        logger,
@@ -92,6 +92,8 @@ func (a *Adapter) Configure() error {
 		a.logger.Fatal().Err(err).Msg("PV: failed to start modbus server")
 		return err
 	}
+
+	a.logger.Info().Msgf("Battery: Modbus server started on %s", a.conf.Host)
 
 	return nil
 }
@@ -210,4 +212,14 @@ func (a *Adapter) computeSetpoint() {
 		a.setPoint_w = a.conf.PCharge_w
 		a.logger.Info().Msgf("Battery: setpoint exceed max charge power. Setpoint: %f, PmaxCharge %f", a.setPoint_w, a.conf.PCharge_w)
 	}
+}
+
+func (a *Adapter) Output() map[string]float64 {
+	return map[string]float64{
+		"p_w": a.p_w,
+	}
+}
+
+func (a *Adapter) Input(value float64, key string) {
+	a.logger.Warn().Msg("Battery: Adapter does not accept input")
 }

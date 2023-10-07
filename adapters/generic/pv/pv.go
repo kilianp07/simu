@@ -32,7 +32,7 @@ type conf struct {
 }
 
 func New(confpath string, simulatedTime *time.Time, logger *zerolog.Logger) *Adapter {
-
+	logger.Info().Msg("PV: Adapter created")
 	a := &Adapter{
 		Conf:          &conf{},
 		logger:        logger,
@@ -77,6 +77,8 @@ func (a *Adapter) Configure() error {
 		a.logger.Fatal().Err(err).Msg("PV: failed to get csv data")
 		return err
 	}
+
+	a.logger.Info().Msg("PV: Adapter configured")
 
 	return nil
 }
@@ -154,4 +156,14 @@ func (a *Adapter) HandleDiscreteInputs(req *modbus.DiscreteInputsRequest) (res [
 
 func (a *Adapter) HandleHoldingRegisters(req *modbus.HoldingRegistersRequest) (res []uint16, err error) {
 	return nil, modbus.ErrIllegalFunction
+}
+
+func (a *Adapter) Input(value float64, key string) {
+	a.logger.Warn().Msg("PV: Adapter does not accept input")
+}
+
+func (a *Adapter) Output() map[string]float64 {
+	return map[string]float64{
+		"p_w": a.p_w,
+	}
 }
