@@ -4,6 +4,12 @@ repos:
       rev: 0.2.1
       hooks:
           - id: yamlfmt
+    - repo: local
+      hooks:
+          - id: install-go-tools
+            name: Install Go Tools
+            entry: ./.pre-commit/install-go-tools.sh
+            language: system
     - repo: https://github.com/dnephin/pre-commit-golang
       rev: v0.5.1
       hooks:
