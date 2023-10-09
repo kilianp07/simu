@@ -106,15 +106,19 @@ func (a *Adapter) HandleHoldingRegisters(req *modbus.HoldingRegistersRequest) (r
 	return nil, modbus.ErrIllegalFunction
 }
 
-func (a *Adapter) Output() map[string]float64 {
+func (a *Adapter) Output() map[string]any {
 	a.logger.Warn().Msg("generic/poc: Adapter does not have output")
 	return nil
 }
 
-func (a *Adapter) Input(value float64, key string) {
+func (a *Adapter) Input(value any, key string) {
 	switch key {
 	case keyPw:
-		a.p_w = int32(value)
+		if _, ok := value.(float64); !ok {
+			a.logger.Warn().Msgf("generic/poc: Adapter input %s is not a float64", key)
+			return
+		}
+		a.p_w = int32(value.(float64))
 	default:
 		a.logger.Warn().Msgf("generic/poc: Adapter does not have input %s", key)
 	}

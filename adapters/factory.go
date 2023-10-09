@@ -15,8 +15,8 @@ import (
 type Adapter interface {
 	Configure() error
 	Cycle(*time.Time)
-	Output() map[string]float64
-	Input(value float64, key string)
+	Output() map[string]any
+	Input(value any, key string)
 }
 
 func New(name string, confpath string, simulatedTime *time.Time, logger *zerolog.Logger) *Adapter {

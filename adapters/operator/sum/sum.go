@@ -67,16 +67,21 @@ func (a *Adapter) Cycle(simulatedTime *time.Time) {
 	a.result = result
 }
 
-func (a *Adapter) Output() map[string]float64 {
-	return map[string]float64{
+func (a *Adapter) Output() map[string]any {
+	return map[string]any{
 		"result": a.result,
 	}
 }
 
-func (a *Adapter) Input(value float64, key string) {
+func (a *Adapter) Input(value any, key string) {
 	for i, member := range a.conf.Members {
 		if member.Key == key {
-			a.conf.Members[i].value = value
+			v, ok := value.(float64)
+			if !ok {
+				a.logger.Error().Msgf("operator/sum: Unexpected input type for key %s", value)
+				return
+			}
+			a.conf.Members[i].value = v
 			return
 		}
 	}
