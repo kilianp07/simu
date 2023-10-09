@@ -30,15 +30,19 @@ func New(confpath string, simulatedTime *time.Time, logger *zerolog.Logger) *Ada
 func (a *Adapter) Cycle(*time.Time) {
 }
 
-func (a *Adapter) Output() map[string]float64 {
+func (a *Adapter) Output() map[string]any {
 	a.logger.Warn().Msgf("dummy/receiver: Adapter does not send output")
 	return nil
 }
 
-func (a *Adapter) Input(value float64, key string) {
+func (a *Adapter) Input(value any, key string) {
 	switch key {
 	case keyValue:
-		a.value = value
+		if _, ok := value.(float64); !ok {
+			a.logger.Error().Msgf("dummy/receiver: Unexpected input type for key %s", value)
+			return
+		}
+		a.value = value.(float64)
 		a.logger.Info().Msgf("dummy/receiver: Received value %f", a.value)
 	default:
 		a.logger.Warn().Msgf("dummy/receiver: Adapter does not accept input for key %s", key)

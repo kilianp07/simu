@@ -32,13 +32,13 @@ func (a *Adapter) Cycle(*time.Time) {
 	a.value = rand.Float64()
 }
 
-func (a *Adapter) Output() map[string]float64 {
+func (a *Adapter) Output() map[string]any {
 	a.logger.Debug().Msgf("dummy/sender: Sending value %f", a.value)
-	return map[string]float64{
+	return map[string]any{
 		keyValue: a.value,
 	}
 }
 
-func (a *Adapter) Input(value float64, key string) {
+func (a *Adapter) Input(value any, key string) {
 	a.logger.Warn().Msg("dummy/sender: Adapter does not accept input")
 }

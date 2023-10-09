@@ -72,7 +72,7 @@ func (l *Links) Update() {
 		source adapters.Adapter
 		target adapters.Adapter
 
-		data float64
+		data any
 	)
 
 	for _, link := range l.Links {

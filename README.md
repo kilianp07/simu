@@ -57,8 +57,6 @@ To create and run simulations using Simu, you can follow these steps:
 
 3. Observe the simulation as it runs and generates results.
 
-Thank you for the additional information. You can update the README to include details about the CSV format for defining links. Here's an updated section in the README to explain how to define links using the CSV file:
-
 ## Configuration
 
 The configuration of your simulation is essential. You can customize various aspects of your simulation by editing the configuration file. The configuration includes settings for simulation time, adapter configurations, and links between adapters.

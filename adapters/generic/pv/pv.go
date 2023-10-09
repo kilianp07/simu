@@ -158,12 +158,12 @@ func (a *Adapter) HandleHoldingRegisters(req *modbus.HoldingRegistersRequest) (r
 	return nil, modbus.ErrIllegalFunction
 }
 
-func (a *Adapter) Input(value float64, key string) {
+func (a *Adapter) Input(value any, key string) {
 	a.logger.Warn().Msg("PV: Adapter does not accept input")
 }
 
-func (a *Adapter) Output() map[string]float64 {
-	return map[string]float64{
+func (a *Adapter) Output() map[string]any {
+	return map[string]any{
 		"p_w": a.p_w,
 	}
 }
