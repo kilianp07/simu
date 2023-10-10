@@ -1,0 +1,20 @@
+{
+    "start": "2023-10-02T15:04:05Z",
+    "end": "2023-10-02T17:04:05Z",
+    "period_ms": 1000,
+    "timestep_ms": 1000,
+    "debug": true,
+    "links_path": "/conf/links.csv",
+    "adapters": [
+      {
+        "adapter": "dummy/sender",
+        "name": "sender",
+        "confPath": ""
+      },
+      {
+        "adapter": "dummy/receiver",
+        "name": "receiver",
+        "confPath": ""
+      }
+    ]
+}
