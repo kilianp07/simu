@@ -1,6 +1,6 @@
 ## Package `pv`
 
-The `pv` package provides functionality for simulating a photovoltaic (PV) system. It allows interaction with a Modbus server and provides power output based on CSV data.
+The `pv` package provides functionality for simulating a photovoltaic (PV) system. It allows interaction with a Modbus server.
 
 ### Table of Contents
 - [Types](#Types)
@@ -31,14 +31,13 @@ type Adapter struct {
 
 - `New(confpath string, simulatedTime *time.Time, logger *zerolog.Logger) *Adapter`: Creates a new `Adapter` instance and initializes it with the provided configuration path, simulated time, and logger.
 - `Configure() error`: Reads the configuration from the specified path, initializes the Modbus server, and starts it for communication.
-- `getCsvData() error`: Reads CSV data from a specified file and stores it for power simulation.
 - `Cycle(simulatedTime *time.Time)`: Simulates a cycle of the PV system, updating power output based on CSV data.
 - `HandleInputRegisters(req *modbus.InputRegistersRequest) (res []uint16, err error)`: Handles Modbus input registers requests for reading power output.
 - `HandleCoils(req *modbus.CoilsRequest) (res []bool, err error)`: Handles Modbus coils requests (not implemented).
 - `HandleDiscreteInputs(req *modbus.DiscreteInputsRequest) (res []bool, err error)`: Handles Modbus discrete inputs requests (not implemented).
 - `HandleHoldingRegisters(req *modbus.HoldingRegistersRequest) (res []uint16, err error)`: Handles Modbus holding registers requests (not implemented).
-- `Input(value float64, key string)`: Handles input values for the PV system (not implemented).
-- `Output() map[string]float64`: Provides a map containing the current power output of the PV system.
+- `Input(value any, key string)`: Handles input values for the PV system.
+- `Output() map[string]any`: Provides a map containing the current power output of the PV system.
 
 ### Configuration
 
@@ -46,20 +45,9 @@ The `pv` package relies on a JSON configuration file to set its parameters. Here
 
 ```json
 {
-  "start_date": "2023-01-01 00:00:00",
-  "time_format": "2006-01-02 15:04:05",
-  "csv_path": "pv_data.csv",
-  "p_col": 2,
-  "date_col": 0,
   "host": "localhost:502"
 }
 ```
-
-- `start_date`: The starting date and time for PV simulation.
-- `time_format`: The time format used in the CSV data.
-- `csv_path`: The path to the CSV data file.
-- `p_col`: The column index in the CSV data containing power values.
-- `date_col`: The column index in the CSV data containing date and time values.
 - `host`: The Modbus server host address.
 
 ### Modbus Registers
@@ -68,7 +56,7 @@ Here is a table of Modbus registers used in the `pv` package, along with their d
 
 | Register Address | Description              | Data Type | Unit       |
 |------------------|--------------------------|-----------|------------|
-| 0                | Power Output (p_w)       | float64   | Watts (W)  |
+| 0                | Power Output (p_w)       | int32   | Watts (W)  |
 
 
 This table lists the Modbus register addresses, provides a brief description of each register's purpose, specifies the data type of the data stored in the register, and indicates the unit of measurement for the data.
