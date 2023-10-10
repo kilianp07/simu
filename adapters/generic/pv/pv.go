@@ -2,7 +2,6 @@ package pv
 
 import (
 	"fmt"
-	"strconv"
 	"time"
 
 	"github.com/kilianp07/simu/utils"
@@ -15,7 +14,6 @@ type Adapter struct {
 	Conf          *conf
 	confPath      string
 	logger        *zerolog.Logger
-	data          [][]string
 	simulatedTime *time.Time
 	iteration     uint
 
@@ -23,12 +21,7 @@ type Adapter struct {
 }
 
 type conf struct {
-	StartDate  string `json:"start_date"`
-	TimeFormat string `json:"time_format"`
-	CsvPath    string `json:"csv_path"`
-	P_col      uint   `json:"p_col"`
-	Date_col   uint   `json:"date_col"`
-	Host       string `json:"host"`
+	Host string `json:"host"`
 }
 
 func New(confpath string, simulatedTime *time.Time, logger *zerolog.Logger) *Adapter {
@@ -73,56 +66,15 @@ func (a *Adapter) Configure() error {
 		return err
 	}
 
-	if err := a.getCsvData(); err != nil {
-		a.logger.Fatal().Err(err).Msg("PV: failed to get csv data")
-		return err
-	}
-
 	a.logger.Info().Msg("PV: Adapter configured")
-
-	return nil
-}
-
-func (a *Adapter) getCsvData() error {
-	var (
-		data [][]string
-		err  error
-	)
-
-	if data, err = utils.ReadCsvFile(a.Conf.CsvPath); err != nil {
-		a.logger.Fatal().Err(err).Msg("PV: failed to read csv file")
-		return err
-	}
-
-	a.data = data
 
 	return nil
 }
 
 func (a *Adapter) Cycle(simulatedTime *time.Time) {
 
-	delta := simulatedTime.Sub(*a.simulatedTime)
-
-	nextDate, err := time.Parse(a.Conf.TimeFormat, a.data[a.iteration+1][a.Conf.Date_col])
-	if err != nil {
-		a.logger.Err(err).Msg("PV: failed to parse date")
-	}
-
-	actualDate, err := time.Parse(a.Conf.TimeFormat, a.data[a.iteration][a.Conf.Date_col])
-	if err != nil {
-		a.logger.Err(err).Msg("PV: failed to parse date")
-	}
-
-	if nextDate.After(actualDate.Add(delta)) {
-		a.iteration++
-	}
-
-	a.p_w, err = strconv.ParseFloat(a.data[a.iteration][a.Conf.P_col], 64)
-	if err != nil {
-		a.logger.Err(err).Msg("PV: failed to parse power")
-	}
-
 }
+
 func (a *Adapter) HandleInputRegisters(req *modbus.InputRegistersRequest) (res []uint16, err error) {
 
 	// loop through all register addresses from req.addr to req.addr + req.Quantity - 1
@@ -159,7 +111,17 @@ func (a *Adapter) HandleHoldingRegisters(req *modbus.HoldingRegistersRequest) (r
 }
 
 func (a *Adapter) Input(value any, key string) {
-	a.logger.Warn().Msg("PV: Adapter does not accept input")
+	switch key {
+	case "p_w":
+		_, ok := value.(float64)
+		if !ok {
+			a.logger.Warn().Msg("PV: invalid input type for p_w")
+			return
+		}
+		a.p_w = value.(float64)
+	default:
+		a.logger.Warn().Msg("PV: invalid input key")
+	}
 }
 
 func (a *Adapter) Output() map[string]any {
