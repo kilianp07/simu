@@ -8,6 +8,7 @@ import (
 	"github.com/kilianp07/simu/adapters/generic/battery"
 	"github.com/kilianp07/simu/adapters/generic/poc"
 	"github.com/kilianp07/simu/adapters/generic/pv"
+	csvreader "github.com/kilianp07/simu/adapters/operator/csvReader"
 	"github.com/kilianp07/simu/adapters/operator/sum"
 	"github.com/rs/zerolog"
 )
@@ -29,6 +30,8 @@ func New(name string, confpath string, simulatedTime *time.Time, logger *zerolog
 		adapter = battery.New(confpath, simulatedTime, logger)
 	case "generic/poc":
 		adapter = poc.New(confpath, simulatedTime, logger)
+	case "operator/reader":
+		adapter = csvreader.New(confpath, simulatedTime, logger)
 	case "operator/sum":
 		adapter = sum.New(confpath, simulatedTime, logger)
 	case "dummy/sender":
