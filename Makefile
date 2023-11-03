@@ -9,7 +9,7 @@ src_files := $(shell find . -type f -name '*.go' -not -path "./vendor/*")
 
 # Default target
 .PHONY: all
-all: build run clean docs docker
+all: build run clean docker
 
 # Build target
 .PHONY: build
@@ -32,7 +32,12 @@ clean:
 # Target to generate GoDoc documentation for all packages
 .PHONY: docs
 docs:
-	@bash -c "$(curl -fsSL https://raw.githubusercontent.com/turo/pre-commit-hooks/main/hooks/golang/gomarkdoc.sh)"
+	@echo "Downloading gomarkdoc.sh script..."
+	@curl -fsSL -o gomarkdoc.sh https://raw.githubusercontent.com/turo/pre-commit-hooks/main/hooks/golang/gomarkdoc.sh
+	@chmod +x gomarkdoc.sh
+	@echo "Executing gomarkdoc.sh script..."
+	@./gomarkdoc.sh
+	@rm gomarkdoc.sh
 
 # Test target
 .PHONY: test
@@ -42,12 +47,12 @@ test:
 # Create docker image
 .PHONY: docker
 docker:
-	@if [ -n "$(RELEASE_TAG)" ]; then \
-		docker build -t $(binary_name_lower):$(RELEASE_TAG) . ; \
+	@RELEASE_TAG=$$(git tag); \
+	if [ -n "$$RELEASE_TAG" ]; then \
+		docker build -t $(binary_name_lower):$$RELEASE_TAG . ; \
 	else \
 		docker build -t $(binary_name_lower):dev . ; \
 	fi
-
 # Help target
 .PHONY: help
 help:
