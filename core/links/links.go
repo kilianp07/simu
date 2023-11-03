@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	"github.com/kilianp07/simu/adapters"
+	"github.com/kilianp07/simu/logger"
 	"github.com/kilianp07/simu/utils"
 )
 
@@ -71,13 +72,22 @@ func (l *Links) Update() {
 	var (
 		source adapters.Adapter
 		target adapters.Adapter
+		ok     bool
 
 		data any
 	)
 
 	for _, link := range l.Links {
-		source = l.adapters[link.source.adapterName]
-		target = l.adapters[link.target.adapterName]
+		source, ok = l.adapters[link.source.adapterName]
+		if !ok {
+			logger.Get().Error().Msgf("Output adapter %s not found", link.source.adapterName)
+			continue
+		}
+		target, ok = l.adapters[link.target.adapterName]
+		if !ok {
+			logger.Get().Error().Msgf("Input adapter %s not found", link.target.adapterName)
+			continue
+		}
 
 		data = source.Output()[link.source.key]
 		target.Input(data, link.target.key)
