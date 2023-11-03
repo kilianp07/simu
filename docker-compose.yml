@@ -1,0 +1,10 @@
+---
+version: '3'
+
+services:
+    simu:
+        image: ghcr.io/kilianp07/simu:v0.1
+        volumes:
+            - ./docker/:/conf
+        restart: always
+        command: simu --conf /conf/simu.json
