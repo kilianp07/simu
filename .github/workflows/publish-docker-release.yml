@@ -26,3 +26,13 @@ jobs:
               run: |-
                   docker build . --tag ghcr.io/kilianp07/simu:${{ github.event.release.name }}
                   docker push ghcr.io/kilianp07/simu:${{ github.event.release.name }}
+    discord:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v2
+            - name: Discord notification
+              env:
+                  DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+              uses: Ilshidur/action-discord@master
+              with:
+                  args: '**Simu Release:** *${{ github.event.release.name }}* has been published by *${{ github.actor }}*'
