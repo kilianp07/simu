@@ -2,6 +2,7 @@ package poc
 
 import (
 	"fmt"
+	"math"
 	"time"
 
 	"github.com/kilianp07/simu/utils"
@@ -23,7 +24,7 @@ type Adapter struct {
 	logger   *zerolog.Logger
 	confPath string
 
-	p_w int32
+	p_w float32
 }
 
 func New(confpath string, simulatedTime *time.Time, logger *zerolog.Logger) *Adapter {
@@ -81,10 +82,10 @@ func (a *Adapter) HandleInputRegisters(req *modbus.InputRegistersRequest) (res [
 	for regAddr := req.Addr; regAddr < req.Addr+req.Quantity; regAddr++ {
 		switch regAddr {
 		case 0:
-			val, _ := utils.Uint32ToUint16(uint32(a.p_w))
+			val, _ := utils.Uint32ToUint16(math.Float32bits(float32(a.p_w * 1000)))
 			res = append(res, val)
 		case 1:
-			_, val := utils.Uint32ToUint16(uint32(a.p_w))
+			_, val := utils.Uint32ToUint16(math.Float32bits(float32(a.p_w * 1000)))
 			res = append(res, val)
 		default:
 			err = modbus.ErrIllegalDataAddress
@@ -118,7 +119,7 @@ func (a *Adapter) Input(value any, key string) {
 			a.logger.Warn().Msgf("generic/poc: Adapter input %s is not a float64", key)
 			return
 		}
-		a.p_w = int32(value.(float64))
+		a.p_w = float32(value.(float64))
 	default:
 		a.logger.Warn().Msgf("generic/poc: Adapter does not have input %s", key)
 	}

@@ -56,7 +56,7 @@ Here is a table of Modbus registers used in the `pv` package, along with their d
 
 | Register Address | Description              | Data Type | Unit       |
 |------------------|--------------------------|-----------|------------|
-| 0                | Power Output (p_w)       | int32   | Watts (W)  |
+| 0                | Power Output (p_w)       | float32   | Watts (W)  |
 
 
 This table lists the Modbus register addresses, provides a brief description of each register's purpose, specifies the data type of the data stored in the register, and indicates the unit of measurement for the data.

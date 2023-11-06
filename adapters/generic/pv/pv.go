@@ -2,6 +2,7 @@ package pv
 
 import (
 	"fmt"
+	"math"
 	"time"
 
 	"github.com/kilianp07/simu/utils"
@@ -81,11 +82,12 @@ func (a *Adapter) HandleInputRegisters(req *modbus.InputRegistersRequest) (res [
 	for regAddr := req.Addr; regAddr < req.Addr+req.Quantity; regAddr++ {
 		switch regAddr {
 		case 0:
-			val, _ := utils.Uint32ToUint16(uint32(a.p_w * 100))
+
+			val, _ := utils.Uint32ToUint16(math.Float32bits(float32(a.p_w * 1000)))
 			res = append(res, val)
 
 		case 1:
-			_, val := utils.Uint32ToUint16(uint32(a.p_w * 100))
+			_, val := utils.Uint32ToUint16(math.Float32bits(float32(a.p_w * 1000)))
 			res = append(res, val)
 
 		default:
