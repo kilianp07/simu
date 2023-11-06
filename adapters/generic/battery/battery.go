@@ -2,6 +2,7 @@ package battery
 
 import (
 	"fmt"
+	"math"
 	"sync"
 	"time"
 
@@ -137,16 +138,17 @@ func (a *Adapter) HandleInputRegisters(req *modbus.InputRegistersRequest) (res [
 			res = append(res, uint16(a.soh))
 
 		case 2:
-			val, _ := utils.Uint32ToUint16(uint32(int32(a.capacity_Wh)))
+
+			val, _ := utils.Uint32ToUint16(math.Float32bits(float32(a.capacity_Wh)))
 			res = append(res, val)
 		case 3:
-			_, val := utils.Uint32ToUint16(uint32(int32(a.capacity_Wh)))
+			_, val := utils.Uint32ToUint16(math.Float32bits(float32(a.capacity_Wh)))
 			res = append(res, val)
 		case 4:
-			val, _ := utils.Uint32ToUint16(uint32(int32(a.p_w)))
+			val, _ := utils.Uint32ToUint16(math.Float32bits(float32(a.p_w)))
 			res = append(res, val)
 		case 5:
-			_, val := utils.Uint32ToUint16(uint32(int32(a.p_w)))
+			_, val := utils.Uint32ToUint16(math.Float32bits(float32(a.p_w)))
 			res = append(res, val)
 		default:
 			err = modbus.ErrIllegalDataAddress

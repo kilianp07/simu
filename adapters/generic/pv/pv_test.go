@@ -1,6 +1,7 @@
 package pv
 
 import (
+	"math"
 	"testing"
 	"time"
 
@@ -39,6 +40,7 @@ func TestHandleInputRegisters(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	defer a.server.Stop()
 
 	// Input the test value into the Adapter
 	a.Input(p_w, "p_w")
@@ -61,13 +63,10 @@ func TestHandleInputRegisters(t *testing.T) {
 	}
 
 	// Check if the response values match the expected values
-	expectedValue := uint32(p_w * 100)
-
-	if utils.Uint16ToUint32(res[0], res[1]) != expectedValue {
-		t.Fatalf("Expected value %d, got %d", expectedValue, utils.Uint16ToUint32(res[0], res[1]))
+	if math.Float32frombits(utils.Uint16ToUint32(res[0], res[1])) != float32(p_w*1000) {
+		t.Fatalf("Expected %f, got %f", float32(p_w*1000), math.Float32frombits(utils.Uint16ToUint32(res[0], res[1])))
 	}
 
-	_ = a.server.Stop()
 }
 
 func TestInput(t *testing.T) {

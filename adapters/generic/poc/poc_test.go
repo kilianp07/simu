@@ -39,15 +39,16 @@ func TestCycle(t *testing.T) {
 	var (
 		a             *Adapter
 		client        *modbus.ModbusClient
-		simulatedTime = time.Now()
-		value         = 100.0
-		result        uint32
+		simulatedTime         = time.Now()
+		value         float32 = 100.0
+		result        float32
 		err           error
 	)
 
 	if a, err = newAdapter(); err != nil {
 		t.Fatal(err)
 	}
+	defer a.server.Stop()
 
 	client, err = modbus.NewClient(&modbus.ClientConfiguration{
 		URL:     fmt.Sprintf("tcp://%s", a.conf.Host),
@@ -64,16 +65,16 @@ func TestCycle(t *testing.T) {
 	defer client.Close()
 
 	// Set Input
-	a.Input(value, keyPw)
+	a.Input(float64(value), keyPw)
 	a.Cycle(&simulatedTime)
 
 	// Read register
-	if result, err = client.ReadUint32(p_wReg, modbus.INPUT_REGISTER); err != nil {
+	if result, err = client.ReadFloat32(p_wReg, modbus.INPUT_REGISTER); err != nil {
 		t.Fatal(err)
 	}
 
-	if result != uint32(value) {
-		t.Fatalf("Expected %f, got %d", value, result)
+	if result != value*1000 {
+		t.Fatalf("Expected %f, got %f", value, result)
 	}
 
 }

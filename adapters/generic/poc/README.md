@@ -90,7 +90,7 @@ func main() {
 
 | Register Address | Description              | Data Type | Unit       |
 |------------------|--------------------------|-----------|------------|
-| 0                | Power Output (p_w)       | int32     | Watts (W)  |
+| 0                | Power Output (p_w)       | float32     | Watts (W)  |
 
 
 
