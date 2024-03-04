@@ -1,6 +1,7 @@
 package core
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/kilianp07/simu/adapters"
@@ -68,6 +69,8 @@ func (r *Runner) run() {
 	for {
 		// Wait for the next cycle
 		if time.Since(r.lastCycle) < time.Duration(r.conf.Timestep)*time.Millisecond {
+			fmt.Println("Waiting for the next cycle")
+			time.Sleep(time.Duration(r.conf.Timestep)*time.Millisecond - time.Since(r.lastCycle))
 			continue
 		}
 
@@ -79,7 +82,7 @@ func (r *Runner) run() {
 		r.links.Update()
 
 		for _, adapter := range r.adapters {
-			adapter.Cycle(r.simulatedTime)
+			go adapter.Cycle(r.simulatedTime)
 		}
 
 		r.lastCycle = time.Now()
