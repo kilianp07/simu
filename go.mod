@@ -3,7 +3,7 @@ module github.com/kilianp07/simu
 go 1.20
 
 require (
-	github.com/rs/zerolog v1.31.0
+	github.com/rs/zerolog v1.32.0
 	github.com/simonvetter/modbus v1.6.0
 	github.com/spf13/cobra v1.7.0
 )
