@@ -108,16 +108,18 @@ func (a *Adapter) Cycle(simulatedTime *time.Time) {
 	if a.soc >= 100 && a.setPoint_w < 0 {
 		a.setPoint_w = 0
 		a.logger.Info().Msg("Battery: soc at 100%, skiping setpoint")
+		a.p_w = 0
 	}
 
 	// If battery is fully discharged and setpoint is asking to discharge, skip setpoint
 	if a.soc <= 0 && a.setPoint_w > 0 {
 		a.setPoint_w = 0
 		a.logger.Info().Msg("Battery: soc at 0%, skiping setpoint")
+		a.p_w = 0
+	} else {
+		// Apply a filter to the delivered power
+		a.p_w = a.filter.Update(float64(a.setPoint_w))
 	}
-
-	// Apply a filter to the delivered power
-	a.p_w = a.filter.Update(float64(a.setPoint_w))
 
 	// Integrate the power to compute the soc
 	a.integraleEnergy_wh += a.integrate(a.p_w, simulatedTime.Sub(*a.simulatedTime))
