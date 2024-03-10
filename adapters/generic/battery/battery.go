@@ -13,7 +13,7 @@ import (
 
 type Adapter struct {
 	server        *modbus.ModbusServer
-	conf          *conf
+	conf          *Conf
 	confPath      string
 	logger        *zerolog.Logger
 	simulatedTime *time.Time
@@ -29,10 +29,10 @@ type Adapter struct {
 	lock               sync.RWMutex
 	filter             *utils.LowPassFilter
 	integraleEnergy_wh float64
-	initialeEnergy_wh  float64
+	initialEnergy_wh   float64
 }
 
-type conf struct {
+type Conf struct {
 	Soc          uint    `json:"soc"`
 	Soh          uint    `json:"soh"`
 	Capacity_Wh  float64 `json:"capacity_wh"`
@@ -42,90 +42,93 @@ type conf struct {
 	Attenuation  float64 `json:"attenuation"`
 }
 
-func New(confpath string, simulatedTime *time.Time, logger *zerolog.Logger) *Adapter {
+func New(confPath string, simulatedTime *time.Time, logger *zerolog.Logger) *Adapter {
 	logger.Info().Msg("Battery: Adapter created")
 	a := &Adapter{
-		conf:          &conf{},
+		conf:          &Conf{},
 		logger:        logger,
 		simulatedTime: simulatedTime,
-		confPath:      confpath,
+		confPath:      confPath,
 		filter:        &utils.LowPassFilter{},
 	}
-
 	return a
 }
 
 func (a *Adapter) Configure() error {
-	var (
-		err error
-	)
-	conf := &conf{}
+	var err error
+	conf := &Conf{}
 
-	if err = utils.ReadJsonFile(a.confPath, &conf); err != nil {
-		a.logger.Fatal().Err(err).Msg("Battery: failed to read config file")
+	if err = utils.ReadJsonFile(a.confPath, conf); err != nil {
+		a.logger.Error().Err(err).Msg("Battery: failed to read config file")
 		return err
 	}
+
 	a.conf = conf
 
 	// Init variables
 	a.soc = a.conf.Soc
 	a.soh = a.conf.Soh
-
-	a.server, err = modbus.NewServer(&modbus.ServerConfiguration{
-		URL: fmt.Sprintf("tcp://%s", a.conf.Host),
-		// close idle connections after 30s of inactivity
-		Timeout: 30 * time.Second,
-		// accept 5 concurrent connections max.
-		MaxClients: 5,
-	}, a)
-
 	a.capacity_Wh = a.conf.Capacity_Wh * float64(a.soh) / 100
-	a.initialeEnergy_wh = a.capacity_Wh * float64(a.soc) / 100
-
+	a.initialEnergy_wh = a.capacity_Wh * float64(a.soc) / 100
 	a.filter = utils.NewLowPassFilter(a.conf.Attenuation)
 
+	a.server, err = modbus.NewServer(&modbus.ServerConfiguration{
+		URL:        fmt.Sprintf("tcp://%s", a.conf.Host),
+		Timeout:    30 * time.Second,
+		MaxClients: 5,
+	}, a)
 	if err != nil {
-		a.logger.Fatal().Err(err).Msg("generic/battery: failed to create modbus server")
+		a.logger.Error().Err(err).Msg("Battery: failed to create modbus server")
 		return err
 	}
 
 	if err = a.server.Start(); err != nil {
-		a.logger.Fatal().Err(err).Msg("generic/battery: failed to start modbus server")
+		a.logger.Error().Err(err).Msg("Battery: failed to start modbus server")
 		return err
 	}
 
-	a.logger.Info().Msgf("generic/battery: Modbus server started on %s", a.conf.Host)
-
+	a.logger.Info().Msgf("Battery: Modbus server started on %s", a.conf.Host)
 	return nil
 }
 
 func (a *Adapter) Cycle(simulatedTime *time.Time) {
-	a.setPoint_w = float64(int32(utils.Uint16ToUint32(a.setPoint1, a.setPoint2)))
+	a.lock.Lock()
+	defer a.lock.Unlock()
 
+	if a.simulatedTime != nil {
+		deltaTime := simulatedTime.Sub(*a.simulatedTime)
+		a.integraleEnergy_wh += a.integrate(a.p_w, deltaTime)
+	}
+	a.simulatedTime = simulatedTime
+	a.setPoint_w = float64(math.Float32frombits(utils.Uint16ToUint32(a.setPoint1, a.setPoint2)))
 	a.computeSetpoint()
 
-	// If battery is fully charged and setpoint is asking to charge, skip setpoint
-	if a.soc >= 100 && a.setPoint_w < 0 {
-		a.setPoint_w = 0
-		a.logger.Info().Msg("Battery: soc at 100%, skiping setpoint")
-		a.p_w = 0
-	}
+	// Update power based on setpoint and filter
 
-	// If battery is fully discharged and setpoint is asking to discharge, skip setpoint
-	if a.soc <= 0 && a.setPoint_w > 0 {
+	if a.soc >= 100 && a.setPoint_w < 0 || a.soc <= 0 && a.setPoint_w > 0 {
 		a.setPoint_w = 0
-		a.logger.Info().Msg("Battery: soc at 0%, skiping setpoint")
-		a.p_w = 0
+		a.logger.Info().Msg("Battery: Skipping setpoint due to SOC limits")
 	} else {
-		// Apply a filter to the delivered power
-		a.p_w = a.filter.Update(float64(a.setPoint_w))
+		a.p_w = a.filter.Update(a.setPoint_w)
 	}
 
-	// Integrate the power to compute the soc
-	a.integraleEnergy_wh += a.integrate(a.p_w, simulatedTime.Sub(*a.simulatedTime))
 	a.computeSoc()
+	a.logger.Debug().Msgf("Battery: setpoint %f, p_w %f, soc %d, integral %f", a.setPoint_w, a.p_w, a.soc, a.integraleEnergy_wh)
+}
 
-	a.logger.Debug().Msgf("Battery: setpoint %f, p_w %f, soc %d, integrale %f", a.setPoint_w, a.p_w, a.soc, a.integraleEnergy_wh)
+func (a *Adapter) computeSoc() {
+	a.soc = uint(((a.initialEnergy_wh - a.integraleEnergy_wh) / a.capacity_Wh) * 100)
+	if a.soc > 100 {
+		a.soc = 100
+	}
+}
+
+func (a *Adapter) computeSetpoint() {
+	if a.setPoint_w > 0 && a.setPoint_w > a.conf.PDischarge_w {
+		a.setPoint_w = a.conf.PDischarge_w
+	} else if a.setPoint_w < 0 && math.Abs(a.setPoint_w) > a.conf.PCharge_w {
+		a.setPoint_w = -a.conf.PCharge_w
+	}
 }
 
 func (a *Adapter) HandleInputRegisters(req *modbus.InputRegistersRequest) (res []uint16, err error) {
@@ -202,25 +205,6 @@ func (a *Adapter) HandleHoldingRegisters(req *modbus.HoldingRegistersRequest) (r
 
 func (a *Adapter) integrate(p float64, delta time.Duration) float64 {
 	return p * delta.Hours()
-}
-
-func (a *Adapter) computeSoc() {
-	a.soc = uint(a.initialeEnergy_wh-a.integraleEnergy_wh/a.capacity_Wh) / 10
-}
-
-func (a *Adapter) computeSetpoint() {
-
-	// If setpoint exceed discharge power limit, set it to the limit
-	if a.setPoint_w > 0 && float64(a.setPoint_w) > a.conf.PDischarge_w {
-		a.setPoint_w = a.conf.PDischarge_w
-		a.logger.Info().Msgf("Battery: setpoint exceed max discharge power. Setpoint: %f, PmaxDisch %f", a.setPoint_w, a.conf.PDischarge_w)
-	}
-
-	// If setpoint exceed charge power limit, set it to the limit
-	if a.setPoint_w < 0 && float64(a.setPoint_w) < a.conf.PCharge_w*-1 {
-		a.setPoint_w = a.conf.PCharge_w
-		a.logger.Info().Msgf("Battery: setpoint exceed max charge power. Setpoint: %f, PmaxCharge %f", a.setPoint_w, a.conf.PCharge_w)
-	}
 }
 
 func (a *Adapter) Output() map[string]any {

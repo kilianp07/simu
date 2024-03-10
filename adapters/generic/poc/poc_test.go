@@ -48,7 +48,12 @@ func TestCycle(t *testing.T) {
 	if a, err = newAdapter(); err != nil {
 		t.Fatal(err)
 	}
-	defer a.server.Stop()
+	defer func() {
+		err := a.server.Stop()
+		if err != nil {
+			t.Fatal(err)
+		}
+	}()
 
 	client, err = modbus.NewClient(&modbus.ClientConfiguration{
 		URL:     fmt.Sprintf("tcp://%s", a.conf.Host),

@@ -4,11 +4,12 @@
     "period_ms": 1000,
     "timestep_ms": 1000,
     "debug": false,
+    "links_path": "test/adapters/generic/battery/links.csv",  
     "adapters": [
       {
         "adapter": "generic/battery",
         "name": "Battery",
-        "confPath": "test/battery/battery.json"
+        "confPath": "test/adapters/generic/battery/battery.json"
       }
     ]
   }

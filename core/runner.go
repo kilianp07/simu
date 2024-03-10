@@ -1,7 +1,6 @@
 package core
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/kilianp07/simu/adapters"
@@ -66,16 +65,16 @@ func (r *Runner) configureLinks() error {
 }
 
 func (r *Runner) run() {
+	period := time.Millisecond * time.Duration(r.conf.Period)
 	for {
 		// Wait for the next cycle
-		if time.Since(r.lastCycle) < time.Duration(r.conf.Timestep)*time.Millisecond {
-			fmt.Println("Waiting for the next cycle")
-			time.Sleep(time.Duration(r.conf.Timestep)*time.Millisecond - time.Since(r.lastCycle))
-			continue
+		if remainingTime := period - time.Since(r.lastCycle); remainingTime > 0 {
+			time.Sleep(remainingTime)
 		}
 
 		// At each cycle, we increment the simulated time
-		t := r.simulatedTime.Add(time.Duration(r.conf.Period) * time.Millisecond)
+		t := r.simulatedTime.Add(period)
+		r.logger.Info().Msgf("Simulated time is %s", t)
 		r.simulatedTime = &t
 
 		// Update I/O
