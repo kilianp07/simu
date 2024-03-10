@@ -17,6 +17,7 @@ type Adapter struct {
 	simulatedTime *time.Time
 	value         float64
 	iteration     uint
+	delta         time.Duration
 }
 
 type conf struct {
@@ -78,26 +79,40 @@ func (a *Adapter) getData() error {
 }
 
 func (a *Adapter) Cycle(simulatedTime *time.Time) {
-
-	delta := simulatedTime.Sub(*a.simulatedTime)
-
-	nextDate, err := time.Parse(a.conf.TimeFormat, a.data[a.iteration+1][a.conf.DateCol])
-	if err != nil {
-		a.logger.Err(err).Msg("Reader: failed to parse date")
+	defer a.updateTime(simulatedTime)
+	if a.simulatedTime != nil {
+		deltaTime := simulatedTime.Sub(*a.simulatedTime)
+		a.delta += deltaTime
+	} else {
+		a.logger.Warn().Msg("Previous simulated time is nil, skipping delta calculation")
 	}
 
-	actualDate, err := time.Parse(a.conf.TimeFormat, a.data[a.iteration][a.conf.DateCol])
-	if err != nil {
-		a.logger.Err(err).Msg("Reader: failed to parse date")
-	}
+	if a.iteration+1 < uint(len(a.data)) {
 
-	if nextDate.After(actualDate.Add(delta)) {
-		a.iteration++
-	}
+		nextDate, err := time.Parse(a.conf.TimeFormat, a.data[a.iteration+1][int(a.conf.DateCol)])
+		if err != nil {
+			a.logger.Err(err).Msg("Reader: failed to parse next date")
+			return
+		}
 
-	a.value, err = strconv.ParseFloat(a.data[a.iteration][a.conf.DataCol], 64)
-	if err != nil {
-		a.logger.Err(err).Msg("Reader: failed to parse power")
+		currentDate, err := time.Parse(a.conf.TimeFormat, a.data[a.iteration][int(a.conf.DateCol)])
+		if err != nil {
+			a.logger.Err(err).Msg("Reader: failed to parse current date")
+			return
+		}
+
+		expectedDelta := nextDate.Sub(currentDate)
+		if a.delta >= expectedDelta {
+			a.iteration++
+			a.delta -= expectedDelta
+			a.logger.Info().Msgf("Reader: Advancing to iteration %d", a.iteration)
+		}
+	}
+	// Mise à jour de la valeur courante
+	if value, err := strconv.ParseFloat(a.data[a.iteration][int(a.conf.DataCol)], 64); err == nil {
+		a.value = value
+	} else {
+		a.logger.Err(err).Msg("Reader: Failed to parse current value")
 	}
 }
 
@@ -109,4 +124,8 @@ func (a *Adapter) Output() map[string]any {
 	return map[string]any{
 		"value": a.value,
 	}
+}
+
+func (a *Adapter) updateTime(t *time.Time) {
+	a.simulatedTime = t
 }

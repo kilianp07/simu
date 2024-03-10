@@ -40,7 +40,12 @@ func TestHandleInputRegisters(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer a.server.Stop()
+	defer func() {
+		err := a.server.Stop()
+		if err != nil {
+			t.Fatal(err)
+		}
+	}()
 
 	// Input the test value into the Adapter
 	a.Input(p_w, "p_w")
