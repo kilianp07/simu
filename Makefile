@@ -47,12 +47,15 @@ test:
 # Create docker image
 .PHONY: docker
 docker:
-	@RELEASE_TAG=$$(git tag); \
+	@RELEASE_TAG=$$(git describe --tags --exact-match HEAD 2>/dev/null); \
 	if [ -n "$$RELEASE_TAG" ]; then \
-		docker build -t $(binary_name_lower):$$RELEASE_TAG . ; \
+		echo "Building Docker image with tag: $$RELEASE_TAG"; \
+		docker build -t "$(binary_name_lower):$$RELEASE_TAG" . ; \
 	else \
-		docker build -t $(binary_name_lower):dev . ; \
+		echo "No specific tag found. Using 'dev' tag."; \
+		docker build -t "$(binary_name_lower):dev" . ; \
 	fi
+
 # Help target
 .PHONY: help
 help:
