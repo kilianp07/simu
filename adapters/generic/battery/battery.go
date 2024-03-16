@@ -209,7 +209,9 @@ func (a *Adapter) integrate(p float64, delta time.Duration) float64 {
 
 func (a *Adapter) Output() map[string]any {
 	return map[string]any{
-		"p_w": a.p_w,
+		"p_w":        a.p_w,
+		"soc":        float64(a.soc),
+		"setpoint_w": a.setPoint_w,
 	}
 }
 

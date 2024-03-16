@@ -108,8 +108,9 @@ func (a *Adapter) HandleHoldingRegisters(req *modbus.HoldingRegistersRequest) (r
 }
 
 func (a *Adapter) Output() map[string]any {
-	a.logger.Warn().Msg("generic/poc: Adapter does not have output")
-	return nil
+	return map[string]any{
+		"p_w": a.p_w,
+	}
 }
 
 func (a *Adapter) Input(value any, key string) {
