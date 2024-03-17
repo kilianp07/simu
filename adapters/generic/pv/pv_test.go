@@ -68,8 +68,8 @@ func TestHandleInputRegisters(t *testing.T) {
 	}
 
 	// Check if the response values match the expected values
-	if math.Float32frombits(utils.Uint16ToUint32(res[0], res[1])) != float32(p_w*1000) {
-		t.Fatalf("Expected %f, got %f", float32(p_w*1000), math.Float32frombits(utils.Uint16ToUint32(res[0], res[1])))
+	if math.Float32frombits(utils.Uint16ToUint32(res[0], res[1])) != float32(p_w) {
+		t.Fatalf("Expected %f, got %f", float32(p_w), math.Float32frombits(utils.Uint16ToUint32(res[0], res[1])))
 	}
 
 }

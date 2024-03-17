@@ -82,10 +82,10 @@ func (a *Adapter) HandleInputRegisters(req *modbus.InputRegistersRequest) (res [
 	for regAddr := req.Addr; regAddr < req.Addr+req.Quantity; regAddr++ {
 		switch regAddr {
 		case 0:
-			val, _ := utils.Uint32ToUint16(math.Float32bits(float32(a.p_w * 1000)))
+			val, _ := utils.Uint32ToUint16(math.Float32bits(a.p_w))
 			res = append(res, val)
 		case 1:
-			_, val := utils.Uint32ToUint16(math.Float32bits(float32(a.p_w * 1000)))
+			_, val := utils.Uint32ToUint16(math.Float32bits(a.p_w))
 			res = append(res, val)
 		default:
 			err = modbus.ErrIllegalDataAddress

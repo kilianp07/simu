@@ -78,7 +78,7 @@ func TestCycle(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if result != value*1000 {
+	if result != value {
 		t.Fatalf("Expected %f, got %f", value, result)
 	}
 
